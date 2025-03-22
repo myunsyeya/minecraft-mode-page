@@ -1,3 +1,21 @@
+/**
+ * 모드 데이터 객체
+ * @typedef {Object} ModData
+ * @property {Array<Mod>} server - 서버측 모드 목록
+ * @property {Array<Mod>} client - 클라이언트측 모드 목록
+ */
+
+/**
+ * 모드 객체
+ * @typedef {Object} Mod
+ * @property {string} name - 모드 이름
+ * @property {string} id - 모드 ID
+ * @property {string} url - 모드 페이지 URL
+ * @property {string} description - 모드 설명
+ * @property {Array<string>} versions - 지원하는 게임 버전 목록
+ * @property {Array<string>} loaders - 지원하는 모드 로더 목록
+ */
+
 // 모드 데이터
 const modData = {
     server: [
@@ -476,19 +494,28 @@ const modData = {
     ]
 };
 
-// 선택된 모드 저장소
+/**
+ * 선택된 모드를 저장하는 객체
+ * @type {{server: Array<Mod>, client: Array<Mod>}}
+ */
 const selectedMods = {
     server: [],
     client: []
 };
 
-// 공통 버전 관리
+/**
+ * 버전 및 로더 관련 변수
+ * @type {Array<string>} commonVersions - 모든 모드가 지원하는 공통 버전 목록
+ * @type {Array<string>} allVersions - 모든 모드의 지원 버전 목록 (합집합)
+ * @type {Array<string>} supportedLoaders - 지원하는 모드 로더 목록
+ * @type {string} selectedLoader - 현재 선택된 로더
+ */
 let commonVersions = [];
 let allVersions = [];
 let supportedLoaders = ['fabric', 'forge', 'neoforge', 'quilt'];
 let selectedLoader = '';
 
-// DOM 요소
+// DOM 요소 선택
 const searchInput = document.getElementById('search-input');
 const versionSelect = document.getElementById('version-select');
 const loaderSelect = document.getElementById('loader-select');
@@ -501,7 +528,12 @@ const selectAllBtn = document.getElementById('select-all');
 const deselectAllBtn = document.getElementById('deselect-all');
 const downloadSelectedBtn = document.getElementById('download-selected');
 
-// API에서 모드 정보 가져오기
+/**
+ * API에서 모드의 지원 버전 정보를 가져옵니다.
+ * @async
+ * @param {Mod} mod - 버전 정보를 가져올 모드 객체
+ * @returns {Promise<Array<string>>} 모드가 지원하는 버전 목록
+ */
 async function fetchModVersions(mod) {
     try {
         const response = await fetch(`https://api.modrinth.com/v2/project/${mod.id}/version`);
@@ -542,7 +574,23 @@ async function fetchModVersions(mod) {
     }
 }
 
-// 특정 버전과 로더의 모드 다운로드 URL 가져오기
+/**
+ * 다운로드 정보 객체
+ * @typedef {Object} DownloadInfo
+ * @property {string} url - 다운로드 URL
+ * @property {string} filename - 파일 이름
+ * @property {string} versionNumber - 모드 버전 번호
+ * @property {Array<string>} loaders - 지원하는 모드 로더 목록
+ */
+
+/**
+ * 특정 버전과 로더의 모드 다운로드 URL 정보를 가져옵니다.
+ * @async
+ * @param {Mod} mod - 다운로드 URL을 가져올 모드 객체
+ * @param {string} gameVersion - 게임 버전 (예: "1.20.1")
+ * @param {string} loader - 모드 로더 (예: "forge", "fabric", "neoforge")
+ * @returns {Promise<DownloadInfo|null>} 다운로드 정보 또는 null (지원하지 않는 경우)
+ */
 async function fetchModDownloadUrl(mod, gameVersion, loader) {
     try {
         const response = await fetch(`https://api.modrinth.com/v2/project/${mod.id}/version`);
@@ -588,7 +636,11 @@ async function fetchModDownloadUrl(mod, gameVersion, loader) {
     }
 }
 
-// 모든 모드의 버전 정보 가져오기
+/**
+ * 모든 모드의 버전 정보를 가져옵니다.
+ * @async
+ * @returns {Promise<void>}
+ */
 async function fetchAllModVersions() {
     const loadingMessage = document.createElement('div');
     loadingMessage.className = 'loading-message';
@@ -638,7 +690,12 @@ async function fetchAllModVersions() {
     renderMods('client', modData.client);
 }
 
-// 공통 버전 찾기
+/**
+ * 서버와 클라이언트 모드 간의 공통 버전을 찾습니다.
+ * @param {Array<Array<string>>} serverVersions - 서버 모드별 지원 버전 목록
+ * @param {Array<Array<string>>} clientVersions - 클라이언트 모드별 지원 버전 목록
+ * @returns {void}
+ */
 function findCommonVersions(serverVersions, clientVersions) {
     // 1. 모든 서버 모드가 지원하는 버전 찾기 (교집합)
     let serverCommonVersions = new Set(serverVersions[0] || []);
@@ -685,7 +742,10 @@ function findCommonVersions(serverVersions, clientVersions) {
     updateSupportedLoaders();
 }
 
-// 지원되는, 모든 모드에 공통인 로더 찾기
+/**
+ * 모든 모드에서 지원하는 로더 목록을 업데이트합니다.
+ * @returns {void}
+ */
 function updateSupportedLoaders() {
     const allLoaders = new Set();
     
@@ -710,7 +770,12 @@ function updateSupportedLoaders() {
     updateLoaderDropdown();
 }
 
-// 버전 비교 함수
+/**
+ * 버전 문자열을 비교합니다.
+ * @param {string} a - 첫 번째 버전 문자열
+ * @param {string} b - 두 번째 버전 문자열
+ * @returns {number} 비교 결과 (-1, 0, 1)
+ */
 function compareVersions(a, b) {
     const [aMajor, aMinor, aPatch] = a.split('.').map(Number);
     const [bMajor, bMinor, bPatch] = b.split('.').map(Number);
@@ -720,7 +785,11 @@ function compareVersions(a, b) {
     return bPatch - aPatch;
 }
 
-// 버전 선택 드롭다운 업데이트
+/**
+ * 버전 선택 드롭다운을 업데이트합니다.
+ * 모든 모드가 지원하는 버전에는 "(모든 모드 지원)" 표시를 추가합니다.
+ * @returns {void}
+ */
 function updateVersionDropdown() {
     versionSelect.innerHTML = '<option value="">모든 버전</option>';
     
@@ -740,7 +809,10 @@ function updateVersionDropdown() {
     });
 }
 
-// 로더 선택 드롭다운 업데이트
+/**
+ * 로더 선택 드롭다운을 업데이트합니다.
+ * @returns {void}
+ */
 function updateLoaderDropdown() {
     loaderSelect.innerHTML = '<option value="">모든 로더</option>';
     
@@ -759,13 +831,23 @@ function updateLoaderDropdown() {
     });
 }
 
-// 초기 모드 표시
+/**
+ * 모드 정보 초기화 및 UI를 업데이트합니다.
+ * @async
+ * @returns {Promise<void>}
+ */
 async function initializeMods() {
     await fetchAllModVersions();
     updateSelectedModsView();
 }
 
-// 모드 렌더링 함수
+/**
+ * 모드 목록을 렌더링합니다.
+ * 현재 필터 조건에 맞는 모드 목록을 UI에 표시합니다.
+ * @param {string} type - 모드 타입 ('server' 또는 'client')
+ * @param {Array<Mod>} mods - 렌더링할 모드 목록
+ * @returns {void}
+ */
 function renderMods(type, mods) {
     const container = type === 'server' ? serverModsContainer : clientModsContainer;
     container.innerHTML = '';
@@ -790,7 +872,14 @@ function renderMods(type, mods) {
     });
 }
 
-// 모드 카드 생성 함수
+/**
+ * 모드 카드 UI를 생성합니다.
+ * @param {Mod} mod - 모드 객체
+ * @param {string} type - 모드 타입 ('server' 또는 'client')
+ * @param {boolean} isSelected - 모드가 선택되었는지 여부
+ * @param {boolean} isSupported - 현재 선택된 버전/로더가 지원되는지 여부
+ * @returns {HTMLElement} 생성된 모드 카드 HTML 요소
+ */
 function createModCard(mod, type, isSelected, isSupported) {
     const modCard = document.createElement('div');
     modCard.className = 'mod-card';
@@ -902,7 +991,11 @@ function createModCard(mod, type, isSelected, isSupported) {
     return modCard;
 }
 
-// 필터링 함수
+/**
+ * 검색어 및 필터에 따라 모드 목록을 필터링합니다.
+ * @param {Array<Mod>} mods - 필터링할 모드 목록
+ * @returns {Array<Mod>} 필터링된 모드 목록
+ */
 function filterMods(mods) {
     const searchTerm = searchInput.value.toLowerCase();
     const selectedVersion = versionSelect.value;
@@ -922,7 +1015,12 @@ function filterMods(mods) {
     });
 }
 
-// 모드 선택/해제 토글
+/**
+ * 모드 선택/해제를 토글합니다.
+ * @param {Mod} mod - 토글할 모드 객체
+ * @param {string} type - 모드 타입 ('server' 또는 'client')
+ * @returns {void}
+ */
 function toggleModSelection(mod, type) {
     const index = selectedMods[type].findIndex(m => m.name === mod.name);
     
@@ -935,7 +1033,10 @@ function toggleModSelection(mod, type) {
     updateSelectedModsView();
 }
 
-// 선택된 모드 뷰 업데이트
+/**
+ * 선택된 모드 목록 UI를 업데이트합니다.
+ * @returns {void}
+ */
 function updateSelectedModsView() {
     selectedModsContainer.innerHTML = '';
     
@@ -978,7 +1079,11 @@ function updateSelectedModsView() {
     }
 }
 
-// 탭 전환
+/**
+ * 탭을 전환합니다.
+ * @param {string} tabId - 전환할 탭 ID
+ * @returns {void}
+ */
 function switchTab(tabId) {
     tabButtons.forEach(btn => {
         btn.classList.remove('active');
@@ -995,7 +1100,10 @@ function switchTab(tabId) {
     });
 }
 
-// 전체 선택 함수
+/**
+ * 현재 활성화된 탭의 모든 모드를 선택합니다.
+ * @returns {void}
+ */
 function selectAll() {
     const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
     
@@ -1018,7 +1126,10 @@ function selectAll() {
     updateSelectedModsView();
 }
 
-// 전체 해제 함수
+/**
+ * 현재 활성화된 탭의 모드 선택을 해제합니다.
+ * @returns {void}
+ */
 function deselectAll() {
     const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
     
@@ -1039,7 +1150,12 @@ function deselectAll() {
     updateSelectedModsView();
 }
 
-// 선택된 모드 다운로드 함수
+/**
+ * 선택된 모드를 다운로드합니다.
+ * 각 모드의 다운로드 URL을 가져와 브라우저에서 다운로드를 시작합니다.
+ * @async
+ * @returns {Promise<void>}
+ */
 async function downloadSelectedMods() {
     const selectedVersion = versionSelect.value;
     const selectedLoader = loaderSelect.value;
@@ -1185,21 +1301,21 @@ async function downloadSelectedMods() {
                         document.getElementById('download-all').addEventListener('click', function() {
                             const links = ${JSON.stringify(downloadLinks)};
                             let i = 0;
-                            function downloadNext() {
+                        function downloadNext() {
                                 if (i < links.length) {
-                                    const a = document.createElement('a');
+                            const a = document.createElement('a');
                                     a.href = links[i];
                                     a.download = '';
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
                                     i++;
                                     setTimeout(downloadNext, 1000);
                                 }
                             }
-                            downloadNext();
-                        });
-                    </script>
+                        downloadNext();
+                    });
+                </script>
                     </body></html>
                 `);
             } else {
@@ -1220,37 +1336,40 @@ async function downloadSelectedMods() {
     }
 }
 
-// 이벤트 리스너 바인딩 함수
+/**
+ * 이벤트 리스너를 등록합니다.
+ * @returns {void}
+ */
 function bindEventListeners() {
-    searchInput.addEventListener('input', () => {
-        renderMods('server', modData.server);
-        renderMods('client', modData.client);
-    });
+searchInput.addEventListener('input', () => {
+    renderMods('server', modData.server);
+    renderMods('client', modData.client);
+});
 
-    versionSelect.addEventListener('change', () => {
-        renderMods('server', modData.server);
-        renderMods('client', modData.client);
-        updateSelectedModsView();
-    });
-    
-    loaderSelect.addEventListener('change', () => {
-        renderMods('server', modData.server);
-        renderMods('client', modData.client);
-        updateSelectedModsView();
-    });
+versionSelect.addEventListener('change', () => {
+    renderMods('server', modData.server);
+    renderMods('client', modData.client);
+    updateSelectedModsView();
+});
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            switchTab(btn.dataset.tab);
-        });
-    });
+loaderSelect.addEventListener('change', () => {
+    renderMods('server', modData.server);
+    renderMods('client', modData.client);
+    updateSelectedModsView();
+});
 
-    selectAllBtn.addEventListener('click', selectAll);
-    deselectAllBtn.addEventListener('click', deselectAll);
-    downloadSelectedBtn.addEventListener('click', downloadSelectedMods);
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        switchTab(btn.dataset.tab);
+    });
+});
+
+selectAllBtn.addEventListener('click', selectAll);
+deselectAllBtn.addEventListener('click', deselectAll);
+downloadSelectedBtn.addEventListener('click', downloadSelectedMods);
 }
 
-// 다운로드 관리자 스타일 추가
+// 다운로드 관리자 CSS 스타일 정의
 const styleElement = document.createElement('style');
 styleElement.textContent = `
     .download-manager {
@@ -1393,9 +1512,12 @@ styleElement.textContent = `
     }
 `;
 
-// 초기화 및 스타일 적용
+/**
+ * 페이지 로드 시 초기화 작업을 수행합니다.
+ * 모드 정보를 가져오고 UI를 설정합니다.
+ */
 document.addEventListener('DOMContentLoaded', async () => {
-    // 스타일 요소를 문서 시작 부분에 추가
+    // 스타일 요소를, 문서 시작 부분에 추가
     document.head.appendChild(styleElement);
     
     await initializeMods();
