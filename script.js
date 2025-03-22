@@ -169,6 +169,62 @@ const modData = {
             description: "여행, 운송 및 탐험을 위한 소박한 항공기를 추가하는 모드입니다.",
             versions: [],
             loaders: []
+        },
+        {
+            name: "BetterTrims",
+            id: "bettertrims",
+            url: "https://modrinth.com/mod/bettertrims",
+            description: "방어구 트림에 고유한 효과를 부여하는 모드입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Forgified Fabric API",
+            id: "forgified-fabric-api",
+            url: "https://modrinth.com/mod/forgified-fabric-api",
+            description: "NeoForge 위에서 Fabric API를 구현한 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Architectury API",
+            id: "architectury-api",
+            url: "https://modrinth.com/mod/architectury-api",
+            description: "Fabric, Forge, NeoForge에서 mod 개발을 쉽게 해주는 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "JamLib",
+            id: "jamlib",
+            url: "https://modrinth.com/mod/jamlib",
+            description: "다양한 Java 유틸리티를 제공하는 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Moonlight",
+            id: "moonlight",
+            url: "https://modrinth.com/mod/moonlight",
+            description: "여러 기능을 제공하는 라이브러리 모드입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Configurable",
+            id: "configurable",
+            url: "https://modrinth.com/mod/configurable",
+            description: "모드에서 분산된 설정을 가능하게 하는 설정 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "YetAnotherConfigLib (YACL)",
+            id: "yacl",
+            url: "https://modrinth.com/mod/yacl",
+            description: "마인크래프트를 위한 빌더 기반 설정 라이브러리입니다.",
+            versions: [],
+            loaders: []
         }
     ],
     client: [
@@ -366,6 +422,54 @@ const modData = {
             id: "immersive-aircraft",
             url: "https://modrinth.com/mod/immersive-aircraft",
             description: "여행, 운송 및 탐험을 위한 소박한 항공기를 추가하는 모드입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "BetterTrims",
+            id: "bettertrims",
+            url: "https://modrinth.com/mod/bettertrims",
+            description: "방어구 트림에 고유한 효과를 부여하는 모드입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Forgified Fabric API",
+            id: "forgified-fabric-api",
+            url: "https://modrinth.com/mod/forgified-fabric-api",
+            description: "NeoForge 위에서 Fabric API를 구현한 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "YetAnotherConfigLib (YACL)",
+            id: "yacl",
+            url: "https://modrinth.com/mod/yacl",
+            description: "마인크래프트를 위한 빌더 기반 설정 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Architectury API",
+            id: "architectury-api",
+            url: "https://modrinth.com/mod/architectury-api",
+            description: "Fabric, Forge, NeoForge에서 mod 개발을 쉽게 해주는 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "JamLib",
+            id: "jamlib",
+            url: "https://modrinth.com/mod/jamlib",
+            description: "다양한 Java 유틸리티를 제공하는 라이브러리입니다.",
+            versions: [],
+            loaders: []
+        },
+        {
+            name: "Moonlight",
+            id: "moonlight",
+            url: "https://modrinth.com/mod/moonlight",
+            description: "여러 기능을 제공하는 라이브러리 모드입니다.",
             versions: [],
             loaders: []
         }
@@ -935,84 +1039,6 @@ function deselectAll() {
     updateSelectedModsView();
 }
 
-// 파일 다운로드 함수
-async function downloadFile(url, filename) {
-    // PyWebView 환경에서 실행 중인지 확인
-    if (window.pywebview !== undefined) {
-        try {
-            // API로 파일 저장 요청 
-            return await window.pywebview.api.save_file(url, filename);
-        } catch (error) {
-            console.error("다운로드 오류:", error);
-            alert(`다운로드 오류: ${error.message || "알 수 없는 오류가 발생했습니다."}`);
-            return { success: false, error: error.message };
-        }
-    } else {
-        // 일반 브라우저에서는 기본 다운로드 동작 사용
-        console.log("브라우저 다운로드:", url, filename);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-        return { success: true };
-    }
-}
-
-// 여러 모드 파일을 순차적으로 다운로드하는 함수
-async function processDownloads(downloadItems) {
-    // 다운로드할 링크 목록 생성
-    const links = downloadItems.map(item => ({
-        url: item.downloadInfo.url,
-        filename: item.downloadInfo.filename
-    }));
-    
-    // 다운로드 상태 표시 요소
-    const statusElem = document.getElementById('download-status');
-    statusElem.style.display = 'block';
-    statusElem.textContent = '다운로드 준비 중...';
-    
-    // 사용자에게 안내 메시지 표시
-    alert('순차적 다운로드를 시작합니다. 각 파일을 다운로드한 후 다음 파일이 자동으로 다운로드됩니다.');
-    
-    // 다운로드 결과 추적
-    let completed = 0;
-    let succeeded = 0;
-    
-    // 순차적으로 파일 다운로드
-    for (let i = 0; i < links.length; i++) {
-        const link = links[i];
-        
-        // 다운로드 상태 표시
-        statusElem.textContent = `다운로드 진행 중: ${i + 1}/${links.length} (${link.filename})`;
-        
-        try {
-            // 파일 다운로드 시도
-            const result = await downloadFile(link.url, link.filename);
-            completed++;
-            
-            if (result.success) {
-                succeeded++;
-                statusElem.textContent = `${completed}/${links.length} 완료 - 다음 파일 준비 중...`;
-            } else {
-                statusElem.textContent = `${completed}/${links.length} - '${link.filename}' 다운로드 실패: ${result.error || '알 수 없는 오류'}`;
-            }
-        } catch (error) {
-            console.error(`다운로드 오류 (${link.filename}):`, error);
-            completed++;
-            statusElem.textContent = `${completed}/${links.length} - '${link.filename}' 다운로드 중 예외 발생`;
-        }
-        
-        // 다음 다운로드 전 잠시 대기 (사용자가 상태를 볼 수 있도록)
-        if (i < links.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-    }
-    
-    // 완료 메시지
-    statusElem.textContent = `다운로드 완료: ${succeeded}개 성공 / ${links.length}개 중`;
-    alert(`다운로드 완료: ${succeeded}개 성공 / ${links.length}개 중`);
-}
-
 // 선택된 모드 다운로드 함수
 async function downloadSelectedMods() {
     const selectedVersion = versionSelect.value;
@@ -1084,325 +1110,113 @@ async function downloadSelectedMods() {
         const downloadable = [...serverDownloads, ...clientDownloads].filter(item => item.downloadInfo);
         const notDownloadable = [...serverDownloads, ...clientDownloads].filter(item => !item.downloadInfo);
         
-        // 서버 모드와 클라이언트 모드 분리
-        const serverModsDownloadable = downloadable.filter(item => 
-            selectedMods.server.some(mod => mod.id === item.mod.id)
-        );
-        const clientModsDownloadable = downloadable.filter(item => 
-            selectedMods.client.some(mod => mod.id === item.mod.id)
-        );
-        
-        // 기존 컨텐츠 저장
-        const originalContent = document.querySelector('.container').innerHTML;
-        
-        // 현재 페이지에 다운로드 정보 표시
-        const container = document.querySelector('.container');
-        container.innerHTML = `
-            <div class="download-page">
-                <div class="download-header">
-                    <h1>모드 다운로드 - ${selectedVersion} ${selectedLoader ? '(' + selectedLoader.charAt(0).toUpperCase() + selectedLoader.slice(1) + ')' : ''}</h1>
-                    <div class="header-buttons">
-                        <button id="show-download-path" class="secondary-btn">다운로드 경로 확인</button>
-                        <button id="back-button" class="primary-btn">목록으로 돌아가기</button>
-                    </div>
-                </div>
-                
-                <div class="download-instructions">
-                    <h3>다운로드 방법</h3>
-                    <p>다음 방법 중 하나로 모드를 다운로드하세요:</p>
-                    <ul>
-                        <li><strong>모든 모드 다운로드</strong> 버튼을 클릭하여 한 번에 모든 모드 다운로드</li>
-                        <li><strong>크롬으로 다운로드</strong> 버튼을 클릭하여 크롬 브라우저에서 다운로드</li>
-                        <li>각 모드 카드의 <strong>다운로드</strong> 버튼을 개별적으로 클릭하여 다운로드</li>
-                        <li>다운로드 링크를 복사하여 다운로드 매니저에 붙여넣기</li>
-                    </ul>
-                    <p class="download-path-note">모든 파일은 선택한 위치에 저장됩니다. <button id="show-download-path-inline" class="text-btn">다운로드 경로 확인하기</button></p>
-                </div>
-                
-                ${downloadable.length > 0 ? `
-                <div class="download-all-container">
-                    <a href="#" class="download-all" id="download-all-btn">모든 모드 다운로드 (${downloadable.length}개)</a>
-                    <a href="#" class="download-all chrome-download" id="download-all-chrome-btn">크롬으로 다운로드 (${downloadable.length}개)</a>
-                    <div id="download-status" style="display: none; background-color: #f1f8e9; padding: 10px; border-radius: 5px; margin: 10px 0; font-weight: bold;">다운로드 준비 중...</div>
-                </div>
-                ` : ''}
-                
-                <!-- 서버 모드 섹션 -->
-                ${serverModsDownloadable.length > 0 ? `
-                <div class="category-section">
-                    <h2>서버 모드 (${serverModsDownloadable.length}개)</h2>
-                    <h3>다운로드 링크 목록</h3>
-                    <table class="download-links-table">
-                        <tr>
-                            <th>모드 이름</th>
-                            <th>버전</th>
-                            <th>다운로드 링크</th>
-                        </tr>
-                        ${serverModsDownloadable.map(item => `
-                        <tr>
-                            <td>${item.mod.name}</td>
-                            <td>${item.downloadInfo.versionNumber}</td>
-                            <td>
-                                <a href="${item.downloadInfo.url}" download="${item.downloadInfo.filename}">${item.downloadInfo.filename}</a>
-                                <button class="copy-btn" data-url="${item.downloadInfo.url}">URL 복사</button>
-                            </td>
-                        </tr>
-                        `).join('')}
-                    </table>
-                    
-                    <div class="mod-list">
-                        ${serverModsDownloadable.map(item => `
-                        <div class="mod-card">
-                            <div class="mod-header">
-                                <div class="mod-title">${item.mod.name}</div>
-                                <div class="mod-version">버전: ${item.downloadInfo.versionNumber}</div>
-                            </div>
-                            <div class="mod-info">
-                                ${item.mod.description}<br>
-                                파일명: ${item.downloadInfo.filename}
-                            </div>
-                            <a href="${item.downloadInfo.url}" class="download-button" download="${item.downloadInfo.filename}">다운로드</a>
-                        </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <!-- 클라이언트 모드 섹션 -->
-                ${clientModsDownloadable.length > 0 ? `
-                <div class="category-section">
-                    <h2>클라이언트 모드 (${clientModsDownloadable.length}개)</h2>
-                    <h3>다운로드 링크 목록</h3>
-                    <table class="download-links-table">
-                        <tr>
-                            <th>모드 이름</th>
-                            <th>버전</th>
-                            <th>다운로드 링크</th>
-                        </tr>
-                        ${clientModsDownloadable.map(item => `
-                        <tr>
-                            <td>${item.mod.name}</td>
-                            <td>${item.downloadInfo.versionNumber}</td>
-                            <td>
-                                <a href="${item.downloadInfo.url}" download="${item.downloadInfo.filename}">${item.downloadInfo.filename}</a>
-                                <button class="copy-btn" data-url="${item.downloadInfo.url}">URL 복사</button>
-                            </td>
-                        </tr>
-                        `).join('')}
-                    </table>
-                    
-                    <div class="mod-list">
-                        ${clientModsDownloadable.map(item => `
-                        <div class="mod-card">
-                            <div class="mod-header">
-                                <div class="mod-title">${item.mod.name}</div>
-                                <div class="mod-version">버전: ${item.downloadInfo.versionNumber}</div>
-                            </div>
-                            <div class="mod-info">
-                                ${item.mod.description}<br>
-                                파일명: ${item.downloadInfo.filename}
-                            </div>
-                            <a href="${item.downloadInfo.url}" class="download-button" download="${item.downloadInfo.filename}">다운로드</a>
-                        </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <!-- 지원되지 않는 모드 섹션 -->
-                ${notDownloadable.length > 0 ? `
-                <div class="category-section">
-                    <h2>다운로드 불가능한 모드 (${notDownloadable.length}개)</h2>
-                    <div class="mod-list">
-                        ${notDownloadable.map(item => `
-                        <div class="mod-card error-card">
-                            <div class="mod-header">
-                                <div class="mod-title">${item.mod.name}</div>
-                            </div>
-                            <div class="error-message">⚠️ ${selectedVersion} 버전을 지원하지 않거나 다운로드 링크를 찾을 수 없습니다.</div>
-                            <div class="mod-info">
-                                ${item.mod.description}<br>
-                                지원 버전: ${item.mod.versions.join(', ')}
-                            </div>
-                            <a href="${item.mod.url}" class="download-button" target="_blank" style="background-color: #9E9E9E;">모드 페이지 방문</a>
-                        </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-        `;
-        
-        // 이벤트 리스너 추가
-        // 뒤로 가기 버튼
-        document.getElementById('back-button').addEventListener('click', function() {
-            document.querySelector('.container').innerHTML = originalContent;
-            
-            // 탭과 모드 상태 복원
-            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-            switchTab(activeTab);
-            renderMods('server', modData.server);
-            renderMods('client', modData.client);
-            updateSelectedModsView();
-            
-            // 이벤트 리스너 다시 추가
-            bindEventListeners();
-        });
-        
-        // 다운로드 경로 확인 버튼
-        const showPathButtons = [
-            document.getElementById('show-download-path'),
-            document.getElementById('show-download-path-inline')
-        ];
-
-        showPathButtons.forEach(btn => {
-            if (btn) {
-                btn.addEventListener('click', function() {
-                    // 로딩 표시
-                    btn.textContent = '경로 확인 중...';
-                    btn.disabled = true;
-                    
-                    try {
-                        // PyWebView 환경에서 실행 중인지 확인
-                        if (window.pywebview !== undefined) {
-                            // API 호출
-                            window.pywebview.api.show_download_path()
-                                .then(() => {
-                                    console.log('다운로드 경로 확인 성공');
-                                })
-                                .catch(error => {
-                                    console.error('경로 확인 중 오류 발생:', error);
-                                    alert(`다운로드 경로를 확인할 수 없습니다.\n오류: ${error || '알 수 없는 오류'}`);
-                                });
-                        } else {
-                            // 브라우저 환경
-                            alert('브라우저에서는 기본 다운로드 폴더에 저장됩니다.');
-                        }
-                    } catch (error) {
-                        console.error('경로 확인 시도 중 오류:', error);
-                        alert('다운로드 경로를 확인할 수 없습니다.');
-                    } finally {
-                        // 버튼 상태 복원
-                        setTimeout(() => {
-                            btn.textContent = btn.id === 'show-download-path' ? '다운로드 경로 확인' : '다운로드 경로 확인하기';
-                            btn.disabled = false;
-                        }, 500);
-                    }
-                });
-            }
-        });
-        
-        // URL 복사 버튼
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const url = this.dataset.url;
-                navigator.clipboard.writeText(url).then(() => {
-                    // 복사 성공 표시
-                    const originalText = this.textContent;
-                    this.textContent = '복사됨!';
-                    setTimeout(() => {
-                        this.textContent = originalText;
-                    }, 1000);
-                });
-            });
-        });
-        
-        // '모든 모드 다운로드' 버튼 이벤트 리스너 준비
-        if (downloadable.length > 0) {
-            // 모든 모드 다운로드 버튼
-            document.getElementById('download-all-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                if (window.pywebview !== undefined) {
-                    processDownloads(downloadable);
-                } else {
-                    // 브라우저에서는 각 링크를 차례로 클릭
-                    alert('브라우저에서는 각 파일이 자동으로 다운로드됩니다.');
-                    downloadable.forEach(item => {
-                        const a = document.createElement('a');
-                        a.href = item.downloadInfo.url;
-                        a.download = item.downloadInfo.filename;
-                        a.click();
-                    });
-                }
-            });
-            
-            // 크롬으로 다운로드 버튼
-            document.getElementById('download-all-chrome-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // 모든 URL 추출
-                const urls = downloadable.map(item => item.downloadInfo.url);
-                
-                // 다운로드 시작 메시지
-                alert(`크롬 브라우저에서 ${urls.length}개 모드 다운로드를 시작합니다.`);
-                
-                // PyWebView 환경에서 실행 중인지 확인
-                if (window.pywebview !== undefined) {
-                    try {
-                        // 모든 URL을 크롬으로 열기
-                        window.pywebview.api.open_urls_in_browser(urls, true)
-                            .then(result => {
-                                console.log('크롬 다운로드 결과:', result);
-                                if (result.success) {
-                                    alert(`${result.success_count}개 URL이 크롬에서 열렸습니다.`);
-                                } else {
-                                    alert('크롬에서 다운로드 중 문제가 발생했습니다.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('크롬 다운로드 오류:', error);
-                                alert('크롬에서 다운로드 시도 중 오류가 발생했습니다.');
-                                
-                                // 대체 방법: 각 URL을 개별적으로 열기
-                                if (confirm('대신 각 다운로드 링크를 수동으로 열까요?')) {
-                                    urls.forEach(url => window.open(url, '_blank'));
-                                }
-                            });
-                    } catch (error) {
-                        console.error('크롬 다운로드 시도 중 오류:', error);
-                        
-                        // 대체 방법: 각 URL을 개별적으로 열기
-                        if (confirm('크롬 다운로드 기능을 사용할 수 없습니다. 대신 각 다운로드 링크를 수동으로 열까요?')) {
-                            urls.forEach(url => window.open(url, '_blank'));
-                        }
-                    }
-                } else {
-                    // 브라우저 환경에서는 새 탭에서 직접 열기
-                    urls.forEach(url => window.open(url, '_blank'));
-                }
-            });
+        // 다운로드 가능한 모드가 없는 경우
+        if (downloadable.length === 0) {
+            alert(`선택한 모드 중 ${selectedVersion} 버전과 ${selectedLoader} 로더를 지원하는 모드가 없습니다.`);
+            return;
         }
         
-        // 다운로드 버튼에 이벤트 리스너 추가 (클라이언트 및 서버 모드 섹션 모두)
-        document.querySelectorAll('.download-button').forEach(button => {
-            button.addEventListener('click', async function(e) {
-                // 링크가 아닌 버튼처럼 동작하도록 기본 이벤트 방지
-                e.preventDefault();
+        // 앱 환경인지 확인 (PyWebView가 있는지 확인)
+        const isAppEnvironment = typeof window.pywebview !== 'undefined';
+        
+        // 다운로드 처리
+        if (isAppEnvironment) {
+            // 다운로드 URL 리스트 추출
+            const downloadUrls = downloadable.map(item => item.downloadInfo.url);
+            const modNames = downloadable.map(item => item.mod.name);
+            
+            // 사용자에게 알림
+            alert(`${downloadUrls.length}개의 모드를 다운로드합니다. 각 다운로드 링크가 브라우저에서 열립니다.`);
+            
+            try {
+                // 각 URL을 개별적으로 열기
+                let openCount = 0;
                 
-                const url = this.getAttribute('href');
-                const filename = this.getAttribute('download');
-                
-                if (url && filename) {
-                    const success = await downloadFile(url, filename);
-                    if (success) {
-                        // 다운로드 성공 표시
-                        const originalText = this.textContent;
-                        this.textContent = '다운로드 완료!';
-                        setTimeout(() => {
-                            this.textContent = originalText;
-                        }, 1500);
-                    } else {
-                        alert('다운로드 중 오류가 발생했습니다.');
-                    }
+                // 사용자 확인 후 진행
+                if (confirm('다운로드를 시작하시겠습니까? 브라우저에서 여러 창이 열립니다.')) {
+                    // 각 URL을 새 창에서 열기
+                    downloadUrls.forEach((url, index) => {
+                        try {
+                            const modName = modNames[index];
+                            console.log(`${modName} 다운로드 링크 열기: ${url}`);
+                            window.open(url, '_blank');
+                            openCount++;
+                            
+                            // 과부하 방지를 위해 잠시 대기 (각 다운로드 간 0.5초)
+                            // setTimeout은 비동기이므로 클로저를 사용해 이벤트 루프가 계속 진행되게 함
+                        } catch (error) {
+                            console.error(`URL 열기 실패: ${url}`, error);
+                        }
+                    });
+                    
+                    // 팝업 차단 확인
+                    setTimeout(() => {
+                        if (openCount === 0) {
+                            alert('다운로드 링크를 열지 못했습니다. 팝업 차단이 활성화되어 있는지 확인하세요.');
+                        } else if (openCount < downloadUrls.length) {
+                            alert(`일부 다운로드 링크만 열렸습니다. (${openCount}/${downloadUrls.length})\n나머지는 팝업이 차단되었을 수 있습니다.`);
+                        }
+                    }, 1000);
                 }
-            });
-        });
+            } catch (error) {
+                console.error("다운로드 링크 열기 오류:", error);
+                alert(`다운로드 링크를 여는 중 오류가 발생했습니다: ${error.message || "알 수 없는 오류"}`);
+            }
+        } else {
+            // 브라우저 환경에서는 새 창으로 다운로드 페이지 표시
+            alert(`브라우저 환경에서는 다운로드 페이지가 새 창으로 열립니다.`);
+            
+            // 다운로드 링크 추출
+            const downloadLinks = downloadable.map(item => item.downloadInfo.url);
+            
+            // 새 탭/창 열기
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write(`
+                    <html><head><title>모드 다운로드</title></head><body>
+                    <h1>다운로드할 모드 (${downloadLinks.length}개)</h1>
+                    <ul>
+                        ${downloadable.map(item => `
+                            <li><a href="${item.downloadInfo.url}" download>${item.mod.name} - ${item.downloadInfo.filename}</a></li>
+                        `).join('')}
+                    </ul>
+                    <button id="download-all">모든 모드 다운로드</button>
+                    <script>
+                        document.getElementById('download-all').addEventListener('click', function() {
+                            const links = ${JSON.stringify(downloadLinks)};
+                            let i = 0;
+                            function downloadNext() {
+                                if (i < links.length) {
+                                    const a = document.createElement('a');
+                                    a.href = links[i];
+                                    a.download = '';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    i++;
+                                    setTimeout(downloadNext, 1000);
+                                }
+                            }
+                            downloadNext();
+                        });
+                    </script>
+                    </body></html>
+                `);
+            } else {
+                alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+            }
+        }
+        
+        // 지원하지 않는 모드 알림
+        if (notDownloadable.length > 0) {
+            const notSupportedMods = notDownloadable.map(item => item.mod.name).join(', ');
+            alert(`다음 모드는 선택한 버전(${selectedVersion})이나 로더(${selectedLoader})를 지원하지 않습니다:\n${notSupportedMods}`);
+        }
         
     } catch (error) {
         loadingMessage.remove();
         console.error('모드 다운로드 정보 가져오기 실패:', error);
-        alert('모드 다운로드 정보를 가져오는 중 오류가 발생했습니다.');
+        alert(`모드 다운로드 정보를 가져오는 중 오류가 발생했습니다:\n${error.message || '알 수 없는 오류'}`);
     }
 }
 
@@ -1436,8 +1250,154 @@ function bindEventListeners() {
     downloadSelectedBtn.addEventListener('click', downloadSelectedMods);
 }
 
-// 초기화
+// 다운로드 관리자 스타일 추가
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+    .download-manager {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+    
+    .download-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .download-header h3 {
+        margin: 0;
+        color: #33691E;
+        font-size: 16px;
+    }
+    
+    .download-controls {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .download-controls button {
+        padding: 5px 10px;
+        background-color: #8BC34A;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .download-controls button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    
+    .download-controls button#cancel-download {
+        background-color: #F44336;
+    }
+    
+    .download-manager .progress-bar {
+        height: 20px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 5px 0 15px 0;
+    }
+    
+    .download-manager .progress-fill {
+        height: 100%;
+        background-color: #8BC34A;
+        width: 0;
+        transition: width 0.3s ease;
+    }
+    
+    .download-manager .progress-label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .current-download {
+        margin-bottom: 15px;
+    }
+    
+    #current-file {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .download-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 10px;
+    }
+    
+    .download-list h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+    
+    #download-queue {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .queue-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+    }
+    
+    .queue-item:last-child {
+        border-bottom: none;
+    }
+    
+    .queue-item.active {
+        background-color: #E8F5E9;
+    }
+    
+    .queue-item.success {
+        background-color: #F1F8E9;
+    }
+    
+    .queue-item.failed {
+        background-color: #FFEBEE;
+    }
+    
+    .queue-name {
+        font-weight: bold;
+        width: 30%;
+    }
+    
+    .queue-file {
+        color: #757575;
+        width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .queue-status {
+        width: 20%;
+        text-align: right;
+    }
+`;
+
+// 초기화 및 스타일 적용
 document.addEventListener('DOMContentLoaded', async () => {
+    // 스타일 요소를 문서 시작 부분에 추가
+    document.head.appendChild(styleElement);
+    
     await initializeMods();
     bindEventListeners();
 }); 
