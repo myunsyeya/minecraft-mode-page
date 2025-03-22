@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마인크래프트 모드 관리</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>마인크래프트 모드 관리</h1>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="모드 검색...">
+                <select id="version-select">
+                    <option value="">모든 버전</option>
+                    <option value="1.20.1">1.20.1</option>
+                    <option value="1.19.4">1.19.4</option>
+                    <option value="1.19.2">1.19.2</option>
+                    <option value="1.18.2">1.18.2</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button id="select-all">전체 선택</button>
+                <button id="deselect-all">전체 해제</button>
+                <button id="download-selected" class="primary-btn">선택 모드 다운로드</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="server">서버 모드</button>
+            <button class="tab-btn" data-tab="client">클라이언트 모드</button>
+            <button class="tab-btn" data-tab="selected">선택된 모드</button>
+        </div>
+
+        <div class="mod-container">
+            <div id="server-mods" class="mod-list active">
+                <h2>서버 측 모드</h2>
+                <div class="mods"></div>
+            </div>
+            <div id="client-mods" class="mod-list">
+                <h2>클라이언트 측 모드</h2>
+                <div class="mods"></div>
+            </div>
+            <div id="selected-mods" class="mod-list">
+                <h2>선택된 모드</h2>
+                <div class="mods"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
