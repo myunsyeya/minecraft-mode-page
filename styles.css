@@ -288,4 +288,201 @@ button:hover {
     button {
         width: 100%;
     }
+}
+
+/* 다운로드 페이지 스타일 */
+.download-page {
+    padding: 20px;
+}
+
+.download-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.download-header h1 {
+    margin: 0;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.download-header button {
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
+.secondary-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.secondary-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+}
+
+.text-btn:hover {
+    color: var(--secondary-color);
+}
+
+.download-path-note {
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.download-instructions {
+    background-color: #DCEDC8;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.download-instructions ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.download-instructions li {
+    margin-bottom: 8px;
+}
+
+.download-all {
+    display: block;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.download-all:hover {
+    background-color: var(--secondary-color);
+}
+
+.download-all-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.chrome-download {
+    background-color: #4285F4; /* 크롬 블루 컬러 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chrome-download:hover {
+    background-color: #3367D6; /* 더 어두운 크롬 블루 */
+}
+
+.chrome-download::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="white"/><circle cx="50" cy="50" r="30" fill="%234285F4"/><circle cx="50" cy="50" r="18" fill="white"/><circle cx="50" cy="50" r="8" fill="%234285F4"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+.download-links-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.download-links-table th {
+    background-color: #8BC34A;
+    color: white;
+    text-align: left;
+    padding: 10px;
+}
+
+.download-links-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.download-links-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.category-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.error-card {
+    border-color: #f44336 !important;
+    background-color: #ffebee;
+}
+
+.error-message {
+    color: #f44336;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.mod-info {
+    color: #757575;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.copy-btn {
+    padding: 5px 10px;
+    background-color: #9E9E9E;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.copy-btn:hover {
+    background-color: #616161;
+}
+
+.download-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #8BC34A;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.download-button:hover {
+    background-color: #689F38;
 } 
