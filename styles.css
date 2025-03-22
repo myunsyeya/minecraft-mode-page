@@ -53,7 +53,12 @@ header h1 {
 }
 
 .search-bar input {
-    width: 60%;
+    width: 50%;
+    margin-right: 10px;
+}
+
+.search-bar select {
+    min-width: 120px;
     margin-right: 10px;
 }
 
@@ -253,6 +258,13 @@ button:hover {
     text-align: center;
 }
 
+/* 로더 정보 스타일 */
+.mod-loaders {
+    font-size: 14px;
+    color: var(--gray-color);
+    margin-top: 5px;
+}
+
 @media (max-width: 768px) {
     .mods {
         grid-template-columns: 1fr;
@@ -262,13 +274,18 @@ button:hover {
         flex-direction: column;
     }
     
-    .search-bar input {
+    .search-bar input, .search-bar select {
         width: 100%;
         margin-right: 0;
         margin-bottom: 10px;
     }
     
     .actions {
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    button {
+        width: 100%;
     }
 } 

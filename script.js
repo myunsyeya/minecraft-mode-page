@@ -6,7 +6,8 @@ const modData = {
             id: "travelersbackpack",
             url: "https://modrinth.com/mod/travelersbackpack",
             description: "다양한 특수 능력을 가진 배낭을 추가하는 모드입니다.",
-            versions: []
+            versions: [],
+            loaders: []
         },
         {
             name: "Dungeons and Taverns",
@@ -120,7 +121,8 @@ const modData = {
             id: "travelersbackpack",
             url: "https://modrinth.com/mod/travelersbackpack",
             description: "다양한 특수 능력을 가진 배낭을 추가하는 모드입니다.",
-            versions: []
+            versions: [],
+            loaders: []
         },
         {
             name: "Easy Anvils",
@@ -267,10 +269,13 @@ const selectedMods = {
 // 공통 버전 관리
 let commonVersions = [];
 let allVersions = [];
+let supportedLoaders = ['fabric', 'forge', 'neoforge', 'quilt'];
+let selectedLoader = '';
 
 // DOM 요소
 const searchInput = document.getElementById('search-input');
 const versionSelect = document.getElementById('version-select');
+const loaderSelect = document.getElementById('loader-select');
 const serverModsContainer = document.querySelector('#server-mods .mods');
 const clientModsContainer = document.querySelector('#client-mods .mods');
 const selectedModsContainer = document.querySelector('#selected-mods .mods');
@@ -291,6 +296,9 @@ async function fetchModVersions(mod) {
         
         // 게임 버전 정보 추출
         const gameVersions = new Set();
+        // 로더 정보 추출
+        const loaders = new Set();
+        
         data.forEach(version => {
             version.game_versions.forEach(gameVersion => {
                 // 주요 버전만 필터링 (예: 1.20.1, 1.19.4 등)
@@ -298,7 +306,17 @@ async function fetchModVersions(mod) {
                     gameVersions.add(gameVersion);
                 }
             });
+            
+            // 로더 정보 추출
+            if (version.loaders && version.loaders.length > 0) {
+                version.loaders.forEach(loader => {
+                    loaders.add(loader);
+                });
+            }
         });
+        
+        // 모드에 로더 정보 저장
+        mod.loaders = Array.from(loaders);
         
         // 정렬된 버전 반환
         return Array.from(gameVersions).sort(compareVersions);
@@ -308,8 +326,8 @@ async function fetchModVersions(mod) {
     }
 }
 
-// 특정 버전의 모드 다운로드 URL 가져오기
-async function fetchModDownloadUrl(mod, gameVersion) {
+// 특정 버전과 로더의 모드 다운로드 URL 가져오기
+async function fetchModDownloadUrl(mod, gameVersion, loader) {
     try {
         const response = await fetch(`https://api.modrinth.com/v2/project/${mod.id}/version`);
         if (!response.ok) {
@@ -317,9 +335,10 @@ async function fetchModDownloadUrl(mod, gameVersion) {
         }
         const versions = await response.json();
         
-        // 선택된 게임 버전을 지원하는 모드 버전 중 가장 최신 버전 찾기
+        // 선택된 게임 버전과 로더를 지원하는 모드 버전 중 가장 최신 버전 찾기
         const compatibleVersions = versions.filter(version => 
-            version.game_versions.includes(gameVersion)
+            version.game_versions.includes(gameVersion) && 
+            (!loader || version.loaders.includes(loader))
         );
         
         if (compatibleVersions.length === 0) {
@@ -335,7 +354,8 @@ async function fetchModDownloadUrl(mod, gameVersion) {
             return {
                 url: primaryFile.url,
                 filename: primaryFile.filename,
-                versionNumber: latestVersion.version_number
+                versionNumber: latestVersion.version_number,
+                loaders: latestVersion.loaders
             };
         }
         
@@ -438,6 +458,34 @@ function findCommonVersions(serverVersions, clientVersions) {
     
     // 정렬된 버전 배열로 변환
     allVersions = [...allVersionsSet].sort(compareVersions);
+    
+    // 5. 지원하는 로더 찾기
+    updateSupportedLoaders();
+}
+
+// 지원되는, 모든 모드에 공통인 로더 찾기
+function updateSupportedLoaders() {
+    const allLoaders = new Set();
+    
+    // 서버 모드의 모든 로더
+    modData.server.forEach(mod => {
+        if (mod.loaders && mod.loaders.length > 0) {
+            mod.loaders.forEach(loader => allLoaders.add(loader));
+        }
+    });
+    
+    // 클라이언트 모드의 모든 로더
+    modData.client.forEach(mod => {
+        if (mod.loaders && mod.loaders.length > 0) {
+            mod.loaders.forEach(loader => allLoaders.add(loader));
+        }
+    });
+    
+    // 지원하는 로더 업데이트
+    supportedLoaders = [...allLoaders].sort();
+    
+    // 로더 선택 드롭다운 업데이트
+    updateLoaderDropdown();
 }
 
 // 버전 비교 함수
@@ -470,6 +518,25 @@ function updateVersionDropdown() {
     });
 }
 
+// 로더 선택 드롭다운 업데이트
+function updateLoaderDropdown() {
+    loaderSelect.innerHTML = '<option value="">모든 로더</option>';
+    
+    // 지원하는 로더 옵션 추가
+    supportedLoaders.forEach(loader => {
+        const option = document.createElement('option');
+        option.value = loader;
+        
+        // 로더 이름 표시 (첫 글자 대문자로)
+        let displayName = loader.charAt(0).toUpperCase() + loader.slice(1);
+        if (loader === 'neoforge') displayName = 'NeoForge';
+        if (loader === 'quilt') displayName = 'Quilt';
+        
+        option.textContent = displayName;
+        loaderSelect.appendChild(option);
+    });
+}
+
 // 초기 모드 표시
 async function initializeMods() {
     await fetchAllModVersions();
@@ -491,20 +558,23 @@ function renderMods(type, mods) {
     filteredMods.forEach(mod => {
         const isSelected = selectedMods[type].some(m => m.name === mod.name);
         const selectedVersion = versionSelect.value;
-        const isVersionSupported = !selectedVersion || mod.versions.includes(selectedVersion);
+        const selectedLoader = loaderSelect.value;
         
-        const modCard = createModCard(mod, type, isSelected, isVersionSupported);
+        const isVersionSupported = !selectedVersion || mod.versions.includes(selectedVersion);
+        const isLoaderSupported = !selectedLoader || (mod.loaders && mod.loaders.includes(selectedLoader));
+        
+        const modCard = createModCard(mod, type, isSelected, isVersionSupported && isLoaderSupported);
         container.appendChild(modCard);
     });
 }
 
 // 모드 카드 생성 함수
-function createModCard(mod, type, isSelected, isVersionSupported) {
+function createModCard(mod, type, isSelected, isSupported) {
     const modCard = document.createElement('div');
     modCard.className = 'mod-card';
     
-    // 선택된 버전을 지원하지 않는 경우 클래스 추가
-    if (!isVersionSupported) {
+    // 선택된 버전/로더를 지원하지 않는 경우 클래스 추가
+    if (!isSupported) {
         modCard.classList.add('unsupported-version');
     }
     
@@ -555,11 +625,41 @@ function createModCard(mod, type, isSelected, isVersionSupported) {
     
     version.textContent = `지원 버전: ${displayVersions.join(', ')}`;
     
-    // 지원하지 않는 버전이 선택된 경우 경고 메시지 추가
-    if (!isVersionSupported && selectedVersion) {
+    // 로더 정보 표시
+    const loaderInfo = document.createElement('div');
+    loaderInfo.className = 'mod-loaders';
+    
+    // 로더 정보 표시 (최대 3개)
+    if (mod.loaders && mod.loaders.length > 0) {
+        const displayLoaders = mod.loaders.length > 3 
+            ? [...mod.loaders.slice(0, 3), `외 ${mod.loaders.length - 3}개`] 
+            : mod.loaders;
+        
+        // 로더 이름 첫 글자 대문자로
+        const formattedLoaders = displayLoaders.map(loader => {
+            if (typeof loader !== 'string') return loader;
+            return loader.charAt(0).toUpperCase() + loader.slice(1);
+        });
+        
+        loaderInfo.textContent = `지원 로더: ${formattedLoaders.join(', ')}`;
+    } else {
+        loaderInfo.textContent = '지원 로더: 정보 없음';
+    }
+    
+    // 지원하지 않는 버전이나 로더가 선택된 경우 경고 메시지 추가
+    if (!isSupported) {
         const warningMsg = document.createElement('div');
         warningMsg.className = 'version-warning';
-        warningMsg.textContent = `⚠️ ${selectedVersion} 버전을 지원하지 않습니다`;
+        
+        // 경고 메시지 구체화
+        if (selectedVersion && !mod.versions.includes(selectedVersion)) {
+            warningMsg.textContent = `⚠️ ${selectedVersion} 버전을 지원하지 않습니다`;
+        } else if (selectedLoader && (!mod.loaders || !mod.loaders.includes(selectedLoader))) {
+            warningMsg.textContent = `⚠️ ${selectedLoader.charAt(0).toUpperCase() + selectedLoader.slice(1)} 로더를 지원하지 않습니다`;
+        } else {
+            warningMsg.textContent = '⚠️ 선택한 버전과 로더 조합을 지원하지 않습니다';
+        }
+        
         modContent.appendChild(warningMsg);
     }
     
@@ -570,6 +670,7 @@ function createModCard(mod, type, isSelected, isVersionSupported) {
     link.textContent = '모드페이지';
     
     modFooter.appendChild(version);
+    modFooter.appendChild(loaderInfo); // 로더 정보 추가
     modFooter.appendChild(link);
     
     modCard.appendChild(modHeader);
@@ -583,12 +684,15 @@ function createModCard(mod, type, isSelected, isVersionSupported) {
 function filterMods(mods) {
     const searchTerm = searchInput.value.toLowerCase();
     const selectedVersion = versionSelect.value;
+    const selectedLoader = loaderSelect.value;
 
     return mods.filter(mod => {
         const nameMatch = mod.name.toLowerCase().includes(searchTerm);
         const descriptionMatch = mod.description.toLowerCase().includes(searchTerm);
         
-        // 버전 필터링은 제거하고 모든 모드를 보여줌 (대신 시각적으로 구분)
+        // 로더 호환성 확인 (선택된 경우에만)
+        const loaderMatch = !selectedLoader || (mod.loaders && mod.loaders.includes(selectedLoader));
+        
         return (nameMatch || descriptionMatch);
     });
 }
@@ -710,9 +814,10 @@ function deselectAll() {
     updateSelectedModsView();
 }
 
-// 선택된 모드 다운로드 함수 (실제로는 링크 목록 생성)
+// 선택된 모드 다운로드 함수
 async function downloadSelectedMods() {
     const selectedVersion = versionSelect.value;
+    const selectedLoader = loaderSelect.value;
     const allSelected = [...selectedMods.server, ...selectedMods.client];
     
     if (allSelected.length === 0) {
@@ -735,10 +840,11 @@ async function downloadSelectedMods() {
         // 서버 모드 다운로드 정보 가져오기
         const serverDownloads = await Promise.all(
             selectedMods.server.map(async mod => {
-                if (mod.versions.includes(selectedVersion)) {
+                if (mod.versions.includes(selectedVersion) && 
+                    (!selectedLoader || (mod.loaders && mod.loaders.includes(selectedLoader)))) {
                     return {
                         mod: mod,
-                        downloadInfo: await fetchModDownloadUrl(mod, selectedVersion)
+                        downloadInfo: await fetchModDownloadUrl(mod, selectedVersion, selectedLoader)
                     };
                 }
                 return {
@@ -751,10 +857,11 @@ async function downloadSelectedMods() {
         // 클라이언트 모드 다운로드 정보 가져오기
         const clientDownloads = await Promise.all(
             selectedMods.client.map(async mod => {
-                if (mod.versions.includes(selectedVersion)) {
+                if (mod.versions.includes(selectedVersion) && 
+                    (!selectedLoader || (mod.loaders && mod.loaders.includes(selectedLoader)))) {
                     return {
                         mod: mod,
-                        downloadInfo: await fetchModDownloadUrl(mod, selectedVersion)
+                        downloadInfo: await fetchModDownloadUrl(mod, selectedVersion, selectedLoader)
                     };
                 }
                 return {
@@ -784,7 +891,7 @@ async function downloadSelectedMods() {
         win.document.write(`
             <html>
             <head>
-                <title>모드 다운로드 - ${selectedVersion}</title>
+                <title>모드 다운로드 - ${selectedVersion} ${selectedLoader ? '(' + selectedLoader + ')' : ''}</title>
                 <meta charset="UTF-8">
                 <style>
                     body {
@@ -917,7 +1024,7 @@ async function downloadSelectedMods() {
             </head>
             <body>
                 <div class="container">
-                    <h1>모드 다운로드 - ${selectedVersion}</h1>
+                    <h1>모드 다운로드 - ${selectedVersion} ${selectedLoader ? '(' + selectedLoader.charAt(0).toUpperCase() + selectedLoader.slice(1) + ')' : ''}</h1>
                     
                     <div class="download-instructions">
                         <h3>다운로드 방법</h3>
@@ -1115,6 +1222,12 @@ searchInput.addEventListener('input', () => {
 });
 
 versionSelect.addEventListener('change', () => {
+    renderMods('server', modData.server);
+    renderMods('client', modData.client);
+    updateSelectedModsView();
+});
+
+loaderSelect.addEventListener('change', () => {
     renderMods('server', modData.server);
     renderMods('client', modData.client);
     updateSelectedModsView();
