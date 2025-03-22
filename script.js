@@ -841,6 +841,19 @@ async function downloadSelectedMods() {
                         font-weight: bold;
                         margin-top: 10px;
                     }
+                    .download-all {
+                        display: block;
+                        text-align: center;
+                        padding: 12px;
+                        background-color: #689F38;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 18px;
+                        margin: 20px 0;
+                        cursor: pointer;
+                    }
                     .category-section {
                         margin-bottom: 30px;
                         padding-bottom: 20px;
@@ -908,12 +921,17 @@ async function downloadSelectedMods() {
                     
                     <div class="download-instructions">
                         <h3>다운로드 방법</h3>
-                        <p>브라우저에서는 보안 상의 이유로 여러 파일을 자동으로 다운로드하는 것을 제한합니다. 다음 방법 중 하나로 다운로드하세요:</p>
+                        <p>다음 방법 중 하나로 모드를 다운로드하세요:</p>
                         <ul>
+                            <li><strong>모든 모드 다운로드</strong> 버튼을 클릭하여 한 번에 모든 모드 다운로드</li>
                             <li>각 모드 카드의 <strong>다운로드</strong> 버튼을 개별적으로 클릭하여 다운로드</li>
                             <li>다운로드 링크를 복사하여 다운로드 매니저에 붙여넣기</li>
                         </ul>
                     </div>
+                    
+                    ${downloadable.length > 0 ? `
+                    <a href="#" class="download-all" id="download-all-btn">모든 모드 다운로드 (${downloadable.length}개)</a>
+                    ` : ''}
                     
                     <!-- 서버 모드 섹션 -->
                     ${serverModsDownloadable.length > 0 ? `
@@ -931,7 +949,7 @@ async function downloadSelectedMods() {
                                 <td>${item.mod.name}</td>
                                 <td>${item.downloadInfo.versionNumber}</td>
                                 <td>
-                                    <a href="${item.downloadInfo.url}" download>${item.downloadInfo.filename}</a>
+                                    <a href="${item.downloadInfo.url}" download="${item.downloadInfo.filename}">${item.downloadInfo.filename}</a>
                                     <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.downloadInfo.url}')">URL 복사</button>
                                 </td>
                             </tr>
@@ -972,7 +990,7 @@ async function downloadSelectedMods() {
                                 <td>${item.mod.name}</td>
                                 <td>${item.downloadInfo.versionNumber}</td>
                                 <td>
-                                    <a href="${item.downloadInfo.url}" download>${item.downloadInfo.filename}</a>
+                                    <a href="${item.downloadInfo.url}" download="${item.downloadInfo.filename}">${item.downloadInfo.filename}</a>
                                     <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.downloadInfo.url}')">URL 복사</button>
                                 </td>
                             </tr>
@@ -1019,6 +1037,64 @@ async function downloadSelectedMods() {
                     </div>
                     ` : ''}
                 </div>
+                
+                <script>
+                    // 모든 모드 다운로드 버튼 클릭 이벤트
+                    document.getElementById('download-all-btn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        const links = [
+                            ${downloadable.map(item => `{url: "${item.downloadInfo.url}", filename: "${item.downloadInfo.filename}"}`).join(',\n')}
+                        ];
+                        
+                        // 순차적 다운로드 처리
+                        let currentIndex = 0;
+                        
+                        // 사용자에게 안내 메시지 표시
+                        alert('순차적 다운로드를 시작합니다. 각 파일을 다운로드한 후 다음 파일이 자동으로 다운로드됩니다.');
+                        
+                        function downloadNext() {
+                            if (currentIndex >= links.length) return; // 모든 다운로드 완료
+                            
+                            const link = links[currentIndex];
+                            const a = document.createElement('a');
+                            a.href = link.url;
+                            a.download = link.filename;
+                            document.body.appendChild(a);
+                            
+                            // 다운로드 시작
+                            a.click();
+                            
+                            // 요소 제거
+                            document.body.removeChild(a);
+                            
+                            // 다음 인덱스 준비
+                            currentIndex++;
+                            
+                            // 다운로드 상태 표시
+                            const statusElem = document.getElementById('download-status');
+                            if (statusElem) {
+                                statusElem.textContent = \`다운로드 진행 중: \${currentIndex}/\${links.length} (\${link.filename})\`;
+                            }
+                            
+                            // 일정 시간 후 다음 다운로드 실행 (3초 간격)
+                            setTimeout(downloadNext, 3000);
+                        }
+                        
+                        // 다운로드 상태를 표시할 요소 추가
+                        const statusDiv = document.createElement('div');
+                        statusDiv.id = 'download-status';
+                        statusDiv.style.cssText = 'background-color: #f1f8e9; padding: 10px; border-radius: 5px; margin: 10px 0; font-weight: bold;';
+                        statusDiv.textContent = '다운로드 준비 중...';
+                        
+                        // 상태 표시 요소를 페이지에 추가
+                        const container = document.querySelector('.container');
+                        container.insertBefore(statusDiv, container.firstChild);
+                        
+                        // 첫 번째 다운로드 시작
+                        downloadNext();
+                    });
+                </script>
             </body>
             </html>
         `);
